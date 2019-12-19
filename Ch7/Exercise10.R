@@ -5,6 +5,7 @@ library(leaps)
 library(gam)
 data("College")
 set.seed(123)
+
 # Adopted from lab - chapter 6
 predict.regsubsets=function(object,newdata,id,...){
     form=as.formula(object$call[[2]])
@@ -15,20 +16,23 @@ predict.regsubsets=function(object,newdata,id,...){
 }
 
 # a
-# Train - test split
-nfolds_out <- 10
-folds_out <- sample(x = 1:nfolds_out, size = nrow(College), replace = TRUE)
+# Train - Test split
+# 70% of the data to select features - train
+# 30% of the data to test
+inds <- sample(x = 1:3, size = nrow(College), replace = TRUE)
+college_test <- College[ inds == 1, ]
+college_train <- College[ inds != 1, ]
 
 # Forward step selection 
-# Identify the best number of features performing 5 fold cross validation
-# on the training set
-college_train <- College[ folds_out != 1, ]
-folds_in <- sample(x = 1:nfolds_out, size = nrow(college_train), replace = TRUE)
-cverrors <- matrix(data = NA, nrow = nfolds_out, ncol = ncol(college_train) - 1)
-rownames(cverrors) <- paste("fold", 1:nfolds_out, sep = ".")
+# Identify the best number of features performing 10 fold cross validation using 
+# only the  training set
+nfolds <- 10
+folds_in <- sample(x = 1:nfolds, size = nrow(college_train), replace = TRUE)
+cverrors <- matrix(data = NA, nrow = nfolds, ncol = ncol(college_train) - 1)
+rownames(cverrors) <- paste("fold", 1:nfolds, sep = ".")
 colnames(cverrors) <- paste("numFeatures", 1:(ncol(college_train) - 1), sep = ".")
 
-for(fold_i in 1:nfolds_out){
+for(fold_i in 1:nfolds){
     regfit.fwd_i <- regsubsets(Outstate ~., data = college_train[ folds_in != fold_i, ], 
                                method = "forward", nvmax = (ncol(College) - 1))
     for(j in 1:(ncol(college_train) - 1)){
@@ -66,28 +70,21 @@ regfit.fwd.best <- regsubsets(Outstate ~., data = college_train,
 selected_features <- coef(regfit.fwd.best, id = 5)[-1]
 
 
-# b TODO ####
-college_train.mm <- as.data.frame(model.matrix(object = Outstate ~ ., 
-                                            data = college_train)[,-1])
-college_train_selFeat <- college_train.mm[, selected_features]
-college_train_selFeat$Outstate <- college_train$Outstate
+# b ####
+names(selected_features)[1] <- "Private"
+college_train_sel <- college_train[, c("Outstate", names(selected_features))]
+fit.gam <- gam(formula = Outstate ~ ns(x = Room.Board, df = 3) + 
+                 ns(x = Terminal, df = 3) + ns(x = perc.alumni, df = 3) + 
+                 ns(x = Expend, df = 3) + Private,
+               data = college_train_sel)
 
-fit.gam <- gam(formula = Outstate ~ ., data = college_train_selFeat)
+# c ###
+college_test <- college_test[ , c("Outstate", names(selected_features))]
+preds <- predict(object = fit.gam, newdata = college_test)
+mse_test <- mean((preds - college_test$Outstate)^2)
 
-plot(fit.gam)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# d ###
+par(mfrow = c(2,3))
+plot(fit.gam, se = TRUE, col = "green")
 
 
