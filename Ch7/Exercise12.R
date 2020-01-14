@@ -17,7 +17,7 @@ betas[1, ] <- c(NA, rnorm(n = ncol(betas)-1))
 
 # First iterations
 for(j in 1:ncol(mymat)){
-    a <- y - betas[1, -j] * mymat[, -j] 
+    a <- y - mymat[, -j] %*% betas[1, -j] 
     betas[1, j] <- lm(a ~ mymat[, j])$coef[2]
 }
 beta0[1] <- lm(a ~ mymat[, j])$coef[1]
@@ -25,7 +25,7 @@ beta0[1] <- lm(a ~ mymat[, j])$coef[1]
 for(i in 2:nIterations){
     cat(i, "\n")
     for(j in 1:ncol(mymat)){
-        a <- y - betas[i - 1, -j] * mymat[, -j] 
+        a <- y - mymat[, -j] %*% betas[i - 1, -j] 
         betas[i, j] <- lm(a ~ mymat[, j])$coef[2]
     }
     beta0[i] <- lm(a ~ mymat[, j])$coef[1]
@@ -44,21 +44,21 @@ plot(x = coef(fit.lm), y = c(beta0[nIterations], betas[nIterations, ]),
                                digits = 2)))
 
 # Necessary steps
-# Mean differences from the last iteration
-meanDiffs <- apply(X = betas, MARGIN = 1, FUN = function(ri){
-    mean(abs(betas[20, ] - ri))
+# Mean differences from the truth - lm output
+betas <- cbind(beta0, betas)
+MSE_Diffs <- apply(X = betas, MARGIN = 1, FUN = function(ri){
+    return(mean((coef(fit.lm) - ri)^2))
 })
 
-plot(meanDiffs, xlab = "Number of iterations")
+LS_Diffs <- apply(X = betas, MARGIN = 1, FUN = function(ri){
+    return(sqrt( sum( ( ri - coef(fit.lm) )^2 ) ))
+})
+    
+    
 
 
+plot(MSE_Diffs, xlab = "Number of iterations", ylab = "Mean Square Error", 
+     main = "Mean differences from the truth - lm output")
 
-sum(betas[20, ] - betas[15, ] == 0)
-
-
-
-
-
-
-
-
+plot(LS_Diffs, xlab = "Number of iterations", ylab = "LS diff", 
+     main = "Mean differences from the truth - lm output")
