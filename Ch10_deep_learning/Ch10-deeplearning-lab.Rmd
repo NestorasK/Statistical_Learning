@@ -113,7 +113,8 @@ x <- scale(model.matrix(Salary ~ . - 1, data = Gitters))
 ```
 
 We first make a matrix, and then we center each of the variables.
-Compound expressions like this can be difficult to parse. We could have obtained the same result using the pipe operator:
+Compound expressions like this can be difficult to parse. 
+We could have obtained the same result using the pipe operator:
 
 ```{r}
 x <- model.matrix(Salary ~ . - 1, data = Gitters) %>% scale()

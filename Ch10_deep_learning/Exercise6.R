@@ -1,4 +1,5 @@
-# 6. Consider the simple function R(β) = sin(β) + β/10.
+# Exercise 6.
+# Consider the simple function R(β) = sin(β) + β/10.
 # (a) Draw a graph of this function over the range β ∈ [−6, 6].
 # (b) What is the derivative of this function?
 # (c) Given β0 = 2.3, run gradient descent to find a local minimum
