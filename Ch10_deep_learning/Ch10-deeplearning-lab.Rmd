@@ -753,8 +753,8 @@ mean(abs(y_test == as.numeric(predy)))
 
 ###  Time Series Prediction
 
-We now show how to fit the models in Section ???
-for  time series prediction.
+We now show how to fit the models in Section 10.5.2
+for time series prediction.
 We first set up the data, and standardize each of the variables.
 
 ```{r}
@@ -805,8 +805,8 @@ arframe <- arframe[-(1:5), ]
 istrain <- istrain[-(1:5)]
 ```
 
-We now fit the linear AR model to the training data using `lm()`, and predict on the
-test data.
+We now fit the linear AR model to the training data using `lm()`, 
+and predict on the test data.
 
 ```{r}
 arfit <- lm(log_volume ~ ., data = arframe[istrain, ])
@@ -909,7 +909,8 @@ turns it into a long vector of predictors. This results in a linear AR model.
 To fit a nonlinear AR model, we could add in a hidden layer.
 
 However, since we already have the matrix of lagged variables from the AR
-model that we fit earlier using the `lm()` command, we can actually fit a nonlinear AR model without needing to perform flattening.
+model that we fit earlier using the `lm()` command, we can actually fit a 
+nonlinear AR model without needing to perform flattening.
 We extract the model matrix `x` from `arframed`, which
 includes the `day_of_week` variable.
 
